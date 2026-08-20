@@ -31,72 +31,72 @@ class AppInventoryScanner @Inject constructor(
      * will be populated by [ScanOrchestrator] after the other engines have run.
      */
     fun scanInstalledApps(): List<AppEntity> {
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            PackageManager.GET_META_DATA or PackageManager.GET_PERMISSIONS
+        val flagsInt = PackageManager.GET_META_DATA or PackageManager.GET_PERMISSIONS
+        val packages = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pm.getInstalledPackages(PackageManager.PackageInfoFlags.of(flagsInt.toLong()))
         } else {
             @Suppress("DEPRECATION")
-            PackageManager.GET_META_DATA or PackageManager.GET_PERMISSIONS
+            pm.getInstalledPackages(flagsInt)
         }
 
-        val packages = pm.getInstalledPackages(flags)
-
         return packages.mapNotNull { pkgInfo ->
-            runCatching {
-                val appInfo: ApplicationInfo = pkgInfo.applicationInfo ?: return@mapNotNull null
+            val appInfo = pkgInfo.applicationInfo ?: return@mapNotNull null
+            
+            // Skip the DroidRaksha app itself from its own scan results
+            if (pkgInfo.packageName == context.packageName) return@mapNotNull null
 
-                // Skip the DroidRaksha app itself from its own scan results
-                if (pkgInfo.packageName == context.packageName) return@mapNotNull null
+            // Determine install source safely
+            val installSource = runCatching { detectInstallSource(pkgInfo.packageName, appInfo) }
+                .getOrDefault(InstallSource.UNKNOWN)
 
-                // Determine install source
-                val installSource = detectInstallSource(pkgInfo.packageName, appInfo)
+            // Certificate info safely
+            val certInfo = runCatching { extractCertInfo(pkgInfo.packageName) }
+                .getOrDefault(Triple("Unknown", "Unknown", true))
 
-                // Certificate info
-                val certInfo = extractCertInfo(pkgInfo.packageName)
+            // Permissions
+            val allPerms = pkgInfo.requestedPermissions?.toList() ?: emptyList()
+            
+            val appName = runCatching { pm.getApplicationLabel(appInfo).toString() }.getOrDefault(pkgInfo.packageName)
+            val apkSize = runCatching { java.io.File(appInfo.sourceDir).length() }.getOrDefault(0L)
 
-                // Permissions
-                val allPerms = pkgInfo.requestedPermissions?.toList() ?: emptyList()
+            AppEntity(
+                packageName = pkgInfo.packageName,
+                appName = appName,
+                versionName = pkgInfo.versionName ?: "unknown",
+                versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                    pkgInfo.longVersionCode else pkgInfo.versionCode.toLong(),
+                installedAt = pkgInfo.firstInstallTime,
+                lastUpdated = pkgInfo.lastUpdateTime,
+                apkSizeBytes = apkSize,
+                targetSdkVersion = appInfo.targetSdkVersion,
+                minSdkVersion = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                    appInfo.minSdkVersion else 1,
+                installSource = installSource.name,
+                certIssuer = certInfo.first,
+                certSubject = certInfo.second,
+                isSelfSigned = certInfo.third,
+                isDebugCert = (appInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0,
 
-                AppEntity(
-                    packageName = pkgInfo.packageName,
-                    appName = pm.getApplicationLabel(appInfo).toString(),
-                    versionName = pkgInfo.versionName ?: "unknown",
-                    versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                        pkgInfo.longVersionCode else pkgInfo.versionCode.toLong(),
-                    installedAt = pkgInfo.firstInstallTime,
-                    lastUpdated = pkgInfo.lastUpdateTime,
-                    apkSizeBytes = runCatching {
-                        java.io.File(appInfo.sourceDir).length()
-                    }.getOrDefault(0L),
-                    targetSdkVersion = appInfo.targetSdkVersion,
-                    minSdkVersion = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                        appInfo.minSdkVersion else 1,
-                    installSource = installSource.name,
-                    certIssuer = certInfo.first,
-                    certSubject = certInfo.second,
-                    isSelfSigned = certInfo.third,
-                    isDebugCert = (appInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0,
-
-                    // Placeholder values — populated by subsequent engines
-                    riskScore = 0,
-                    riskLevel = RiskLevel.SAFE.name,
-                    threatCategories = "[]",
-                    isFakeUpi = false,
-                    isFakeBank = false,
-                    isLoanScam = false,
-                    matchedIocDomains = "[]",
-                    dangerousPermissions = "[]",
-                    dangerousComboFlags = "[]",
-                    totalPermissionCount = allPerms.size,
-                    c2Verdict = "NONE",
-                    c2ConfidenceScore = 0,
-                    detectedC2Frameworks = "[]",
-                    onnxPredictedClass = "Unknown",
-                    onnxConfidence = 0f,
-                    isAnomalyFlagged = false,
-                    lastScannedAt = System.currentTimeMillis(),
-                    deepScanAvailable = false,
-                )
-            }.getOrNull()
+                // Placeholder values
+                riskScore = 0,
+                riskLevel = RiskLevel.SAFE.name,
+                threatCategories = "[]",
+                isFakeUpi = false,
+                isFakeBank = false,
+                isLoanScam = false,
+                matchedIocDomains = "[]",
+                dangerousPermissions = "[]",
+                dangerousComboFlags = "[]",
+                totalPermissionCount = allPerms.size,
+                c2Verdict = "NONE",
+                c2ConfidenceScore = 0,
+                detectedC2Frameworks = "[]",
+                onnxPredictedClass = "Unknown",
+                onnxConfidence = 0f,
+                isAnomalyFlagged = false,
+                lastScannedAt = System.currentTimeMillis(),
+                deepScanAvailable = false,
+            )
         }
     }
 

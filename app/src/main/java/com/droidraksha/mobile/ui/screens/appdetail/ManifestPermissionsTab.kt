@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.droidraksha.mobile.domain.model.AppInfo
 import com.droidraksha.mobile.ui.theme.*
+import com.droidraksha.mobile.ui.components.Level1Card
 
 @Composable
 fun ManifestPermissionsTab(app: AppInfo) {
@@ -81,25 +82,24 @@ fun ManifestPermissionsTab(app: AppInfo) {
                 if (app.dangerousPermissions.isEmpty()) {
                     Text("No declared dangerous Android permissions.", color = RiskLow, fontSize = 12.sp)
                 } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        app.dangerousPermissions.forEach { perm ->
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        app.dangerousPermissions.forEachIndexed { index, perm ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(ShieldNavySurface)
-                                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                                    .padding(vertical = 8.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
                                     text = perm.removePrefix("android.permission."),
                                     color = TextPrimary,
-                                    fontSize = 12.sp,
-                                    fontFamily = FontFamily.Monospace,
-                                    fontWeight = FontWeight.Medium
+                                    style = Typography.bodySmall
                                 )
-                                Text("DANGEROUS", color = RiskHigh, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                                com.droidraksha.mobile.ui.components.ThreatChip(text = "DANGEROUS", isWarning = true)
+                            }
+                            if (index < app.dangerousPermissions.size - 1) {
+                                Divider(color = DividerHairline, thickness = 0.5.dp)
                             }
                         }
                     }
@@ -113,20 +113,20 @@ fun ManifestPermissionsTab(app: AppInfo) {
                 if (app.matchedIocDomains.isEmpty()) {
                     Text("No known suspicious C2 or fraud domains matched.", color = RiskLow, fontSize = 12.sp)
                 } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        app.matchedIocDomains.forEach { domain ->
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        app.matchedIocDomains.forEachIndexed { index, domain ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(RiskCritical.copy(alpha = 0.12f))
-                                    .border(0.5.dp, RiskCritical.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
-                                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                                    .padding(vertical = 8.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(domain, color = RiskCritical, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
-                                Text("FLAGGED IOC", color = RiskCritical, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                                Text(domain, color = RiskCritical, style = Typography.bodySmall)
+                                com.droidraksha.mobile.ui.components.ThreatChip(text = "FLAGGED IOC", isWarning = true)
+                            }
+                            if (index < app.matchedIocDomains.size - 1) {
+                                Divider(color = DividerHairline, thickness = 0.5.dp)
                             }
                         }
                     }
@@ -144,20 +144,16 @@ private fun SectionContainer(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(ShieldNavyCard)
-            .border(0.5.dp, ShieldNavyBorder, RoundedCornerShape(16.dp))
-            .padding(16.dp)
+    Level1Card(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = 16.dp
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(icon, contentDescription = null, tint = ShieldCyan, modifier = Modifier.size(18.dp))
-                Text(title, color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Icon(icon, contentDescription = null, tint = AccentCyan, modifier = Modifier.size(18.dp))
+                Text(title.uppercase(), color = TextSecondary, style = Typography.titleMedium)
             }
-            Divider(color = ShieldNavyBorder, thickness = 0.5.dp)
+            Divider(color = DividerHairline, thickness = 0.5.dp)
             content()
         }
     }
@@ -167,6 +163,6 @@ private fun SectionContainer(
 private fun ManifestMetric(label: String, value: String) {
     Column {
         Text(label, color = TextMuted, fontSize = 11.sp)
-        Text(value, color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Monospace)
+        Text(value, color = TextPrimary, style = Typography.bodySmall.copy(fontWeight = FontWeight.SemiBold, fontSize = 13.sp))
     }
 }

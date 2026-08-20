@@ -3,12 +3,10 @@ package com.droidraksha.mobile.ui.components
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +16,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontFamily
@@ -35,17 +34,16 @@ fun DeviceSecurityGauge(
     safeCount: Int,
     deviceRiskScore: Int,
     isScanning: Boolean,
-    onStartScan: () -> Unit,
+    onStartScan: () -> Unit, // Keeping signature for backward compatibility, but won't render button here
     modifier: Modifier = Modifier
 ) {
-    // Health score: 100 is perfectly clean, 0 is heavily infected
     val healthScore = (100 - deviceRiskScore).coerceIn(0, 100)
 
     val (themeColor, statusText, statusBadge) = when {
         criticalCount > 0 -> Triple(RiskCritical, "CRITICAL RISK", "Immediate Action Required")
         highCount > 0 -> Triple(RiskHigh, "HIGH THREATS", "$highCount High-Risk Apps Found")
         mediumCount > 0 -> Triple(RiskMedium, "WARNINGS", "$mediumCount Apps With Alerts")
-        else -> Triple(ShieldCyan, "SYSTEM SECURE", "Real-Time Shield Active")
+        else -> Triple(RiskSafe, "SYSTEM SECURE", "Real-Time Shield Active")
     }
 
     val infiniteTransition = rememberInfiniteTransition(label = "Pulse")
@@ -68,24 +66,13 @@ fun DeviceSecurityGauge(
         label = "GaugeSweep"
     )
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF131D31),
-                        Color(0xFF0A0F1D)
-                    )
-                )
-            )
-            .border(1.dp, themeColor.copy(alpha = 0.4f), RoundedCornerShape(24.dp))
-            .padding(20.dp)
+    GlassCard(
+        modifier = modifier.fillMaxWidth().clickable { onStartScan() },
+        contentPadding = 24.dp
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             // Top Status Bar
@@ -104,9 +91,7 @@ fun DeviceSecurityGauge(
                     Text(
                         text = statusText,
                         color = themeColor,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
+                        style = Typography.labelSmall,
                         letterSpacing = 1.sp
                     )
                 }
@@ -114,15 +99,13 @@ fun DeviceSecurityGauge(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(themeColor.copy(alpha = 0.12f))
-                        .border(0.5.dp, themeColor.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                        .background(themeColor.copy(alpha = 0.15f))
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
                     Text(
                         text = statusBadge,
                         color = themeColor,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold
+                        style = Typography.labelSmall
                     )
                 }
             }
@@ -131,17 +114,17 @@ fun DeviceSecurityGauge(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(160.dp)
+                    .size(180.dp)
                     .padding(6.dp)
             ) {
-                Canvas(modifier = Modifier.size(150.dp)) {
-                    val strokeWidth = 12.dp.toPx()
+                Canvas(modifier = Modifier.size(160.dp)) {
+                    val strokeWidth = 14.dp.toPx()
                     val diameter = size.minDimension - strokeWidth
                     val topLeft = Offset(strokeWidth / 2, strokeWidth / 2)
 
                     // Outer faint cyber ring
                     drawArc(
-                        color = Color(0xFF1E293B),
+                        color = DividerHairline,
                         startAngle = 135f,
                         sweepAngle = 270f,
                         useCenter = false,
@@ -150,9 +133,16 @@ fun DeviceSecurityGauge(
                         style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                     )
 
-                    // Active Glowing Progress Arc
+                    // Active Glowing Progress Arc (Gradient)
+                    val gradientBrush = Brush.sweepGradient(
+                        colors = listOf(AccentCyan, AccentCyan, AccentCyan),
+                        center = Offset(size.width / 2, size.height / 2)
+                    )
+                    
+                    val brushToUse = if (healthScore > 80) gradientBrush else SolidColor(themeColor)
+
                     drawArc(
-                        color = themeColor,
+                        brush = brushToUse,
                         startAngle = 135f,
                         sweepAngle = animatedProgress * 270f,
                         useCenter = false,
@@ -169,64 +159,19 @@ fun DeviceSecurityGauge(
                     Text(
                         text = "$healthScore",
                         color = TextPrimary,
-                        fontSize = 38.sp,
+                        fontSize = 48.sp, // Oversized numeral
                         fontWeight = FontWeight.ExtraBold,
-                        fontFamily = FontFamily.Monospace
+                        letterSpacing = (-2).sp
                     )
                     Text(
                         text = "SAFETY SCORE",
-                        color = TextMuted,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
+                        color = TextSecondary,
+                        style = Typography.labelSmall,
                         letterSpacing = 1.sp
                     )
                 }
             }
 
-            // Quick Metrics Row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFF0F172A).copy(alpha = 0.7f))
-                    .border(0.5.dp, ShieldNavyBorder, RoundedCornerShape(14.dp))
-                    .padding(vertical = 12.dp, horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                MetricItem(label = "Total Apps", value = "$totalApps", color = TextPrimary)
-                Box(modifier = Modifier.width(1.dp).height(24.dp).background(ShieldNavyBorder))
-                MetricItem(label = "Protected", value = "$safeCount", color = RiskLow)
-                Box(modifier = Modifier.width(1.dp).height(24.dp).background(ShieldNavyBorder))
-                MetricItem(
-                    label = "Flagged",
-                    value = "${criticalCount + highCount + mediumCount}",
-                    color = if (criticalCount + highCount > 0) RiskCritical else RiskLow
-                )
-            }
-
-            // Cyber Scan Button
-            Button(
-                onClick = onStartScan,
-                enabled = !isScanning,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = ShieldCyan,
-                    disabledContainerColor = ShieldNavyBorder
-                ),
-                shape = RoundedCornerShape(14.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-            ) {
-                if (isScanning) {
-                    CircularProgressIndicator(color = ShieldNavyDark, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text("Analyzing Installed Packages...", color = ShieldNavyDark, fontWeight = FontWeight.Bold)
-                } else {
-                    Icon(Icons.Default.Security, contentDescription = null, tint = ShieldNavyDark, modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Run Full Device Threat Scan", color = ShieldNavyDark, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                }
-            }
         }
     }
 }
@@ -234,7 +179,8 @@ fun DeviceSecurityGauge(
 @Composable
 private fun MetricItem(label: String, value: String, color: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(value, color = color, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
-        Text(label, color = TextMuted, fontSize = 10.sp)
+        Text(value, color = color, style = Typography.titleMedium, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(label, color = TextMuted, style = Typography.labelSmall)
     }
 }

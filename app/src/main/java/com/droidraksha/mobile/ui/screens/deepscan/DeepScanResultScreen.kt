@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.droidraksha.mobile.domain.model.RiskLevel
 import com.droidraksha.mobile.ui.components.RiskBadge
 import com.droidraksha.mobile.ui.theme.*
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,7 +38,7 @@ fun DeepScanResultScreen(
     }
 
     Scaffold(
-        containerColor = ShieldNavyDark,
+        containerColor = BackgroundDark,
         topBar = {
             TopAppBar(
                 title = { Text("Gemini AI Deep Scan", color = TextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
@@ -46,7 +47,7 @@ fun DeepScanResultScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = TextPrimary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = ShieldNavyDark)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = BackgroundDark)
             )
         }
     ) { innerPadding ->
@@ -58,7 +59,7 @@ fun DeepScanResultScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(color = ShieldCyan)
+                    CircularProgressIndicator(color = AccentCyan)
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "Querying Threat Intelligence & MalBERT...",
@@ -88,7 +89,7 @@ fun DeepScanResultScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(ShieldNavyCard)
+                                .background(CardLevel2)
                                 .border(1.dp, RiskCritical.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
                                 .padding(18.dp)
                         ) {
@@ -125,15 +126,15 @@ fun DeepScanResultScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(ShieldNavyCard)
-                                .border(1.dp, ShieldCyan.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                                .background(CardLevel2)
+                                .border(1.dp, AccentCyan.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
                                 .padding(18.dp)
                         ) {
                             Column {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = ShieldCyan, modifier = Modifier.size(18.dp))
+                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = AccentCyan, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Gemini Security Copilot Analysis", color = ShieldCyan, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                    Text("Gemini Security Copilot Analysis", color = AccentCyan, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                                 }
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Text(
@@ -152,8 +153,8 @@ fun DeepScanResultScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(ShieldNavyCard)
-                                .border(0.5.dp, ShieldNavyBorder, RoundedCornerShape(16.dp))
+                                .background(CardLevel2)
+                                .border(0.5.dp, DividerHairline, RoundedCornerShape(16.dp))
                                 .padding(16.dp)
                         ) {
                             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -171,7 +172,7 @@ fun DeepScanResultScreen(
 
                                 Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                                     Text("MalBERT Zero-Shot NLP:", color = TextSecondary, fontSize = 12.sp)
-                                    Text(result.malBertLabel, color = ShieldCyan, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                    Text(result.malBertLabel, color = AccentCyan, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                                 }
                             }
                         }

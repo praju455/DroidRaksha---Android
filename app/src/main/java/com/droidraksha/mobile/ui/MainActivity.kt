@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.droidraksha.mobile.ui.navigation.AppNavigation
 import com.droidraksha.mobile.ui.theme.DroidRakshaTheme
-import com.droidraksha.mobile.ui.theme.ShieldNavyDark
+import com.droidraksha.mobile.ui.theme.BackgroundDark
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
             DroidRakshaTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = ShieldNavyDark
+                    color = BackgroundDark
                 ) {
                     val navController = rememberNavController()
                     AppNavigation(navController = navController)

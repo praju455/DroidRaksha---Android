@@ -38,11 +38,11 @@ fun InteractiveScoreboard(
     modifier: Modifier = Modifier
 ) {
     val (primaryColor, bgColor) = when (app.riskLevel) {
-        RiskLevel.CRITICAL -> Pair(RiskCritical, RiskCriticalBg)
-        RiskLevel.HIGH -> Pair(RiskHigh, RiskHighBg)
-        RiskLevel.MEDIUM -> Pair(RiskMedium, RiskMediumBg)
-        RiskLevel.LOW -> Pair(RiskLow, RiskLowBg)
-        RiskLevel.SAFE -> Pair(RiskSafe, RiskSafeBg)
+        RiskLevel.CRITICAL -> Pair(RiskCritical, RiskCritical.copy(alpha = 0.1f))
+        RiskLevel.HIGH -> Pair(RiskHigh, RiskHigh.copy(alpha = 0.1f))
+        RiskLevel.MEDIUM -> Pair(RiskMedium, RiskMedium.copy(alpha = 0.1f))
+        RiskLevel.LOW -> Pair(RiskLow, RiskLow.copy(alpha = 0.1f))
+        RiskLevel.SAFE -> Pair(RiskSafe, RiskSafe.copy(alpha = 0.1f))
     }
 
     var isExpanded by remember { mutableStateOf(true) }
@@ -62,7 +62,7 @@ fun InteractiveScoreboard(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(ShieldNavyCard)
+            .background(CardLevel2)
             .border(1.dp, primaryColor.copy(alpha = 0.4f), RoundedCornerShape(20.dp))
             .padding(18.dp)
     ) {
@@ -182,12 +182,12 @@ fun InteractiveScoreboard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Icon(Icons.Default.TrendingUp, contentDescription = null, tint = ShieldCyan, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.TrendingUp, contentDescription = null, tint = AccentCyan, modifier = Modifier.size(16.dp))
                         Text("Risk Score Breakdown", color = TextSecondary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     }
                     Text(
                         text = if (isExpanded) "Hide" else "Show Details",
-                        color = ShieldCyan,
+                        color = AccentCyan,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -231,7 +231,7 @@ private fun ScoreBreakdownBar(
         pct > 0.66f -> RiskCritical
         pct > 0.33f -> RiskHigh
         pct > 0f -> RiskLow
-        else -> ShieldNavyBorder
+        else -> DividerHairline
     }
 
     Row(

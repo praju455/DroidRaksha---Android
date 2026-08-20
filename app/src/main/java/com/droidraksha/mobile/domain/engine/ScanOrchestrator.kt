@@ -101,11 +101,15 @@ class ScanOrchestrator @Inject constructor(
 
             val scored = scoreSingleApp(baseEntity)
             scannedEntities.add(scored)
+            
+            // Incrementally save so Dashboard updates in real time
+            withContext(Dispatchers.IO) {
+                repository.upsert(scored)
+            }
         }
 
-        // ── Persist results ──────────────────────────────────────────────
+        // ── Clean up stale apps ──────────────────────────────────────────
         withContext(Dispatchers.IO) {
-            repository.upsertAll(scannedEntities)
             repository.pruneUninstalledApps(scannedEntities.map { it.packageName })
         }
 

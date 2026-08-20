@@ -2,34 +2,38 @@ package com.droidraksha.mobile.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary cybersecurity dark theme palette
-val ShieldNavyDark = Color(0xFF0A0E17)
-val ShieldNavySurface = Color(0xFF121A2A)
-val ShieldNavyCard = Color(0xFF1B263B)
-val ShieldNavyBorder = Color(0xFF2E3F5E)
+// NeonShield Inspired Cybersecurity Deep Black Palette
+val BackgroundDark = Color(0xFF02040A)
+val BackgroundSurface = Color(0xFF000000)
 
-val ShieldCyan = Color(0xFF00E5FF)
-val ShieldBlue = Color(0xFF2979FF)
-val ShieldAccent = Color(0xFF3D5AFE)
+// Elevation & Hierarchy (Flat, matte cards)
+val CardLevel1 = Color(0xFF111111) // Primary/Hero cards
+val CardLevel2 = Color(0xFF111111) // Standard content cards
+val DividerHairline = Color(0x14FFFFFF) // 8% white for borders/dividers
 
-// 5-Tier Threat Severity Colors (SIH DroidRaksha Standard)
-val RiskCritical = Color(0xFFFF1744)   // Red 80-100
-val RiskCriticalBg = Color(0x26FF1744)
-val RiskHigh = Color(0xFFFF6D00)       // Orange 60-79
-val RiskHighBg = Color(0x26FF6D00)
-val RiskMedium = Color(0xFFFFD600)     // Yellow/Amber 40-59
-val RiskMediumBg = Color(0x26FFD600)
-val RiskLow = Color(0xFF00E676)        // Green-Yellow 20-39
-val RiskLowBg = Color(0x2600E676)
-val RiskSafe = Color(0xFF00B0FF)       // Blue 0-19
-val RiskSafeBg = Color(0x2600B0FF)
+// Single Brand Accent
+val AccentCyan = Color(0xFF00F0FF)
+val AccentGlow = Color(0xFF1A56FF)
 
-// Text colors
-val TextPrimary = Color(0xFFF0F4F8)
-val TextSecondary = Color(0xFF94A3B8)
-val TextMuted = Color(0xFF64748B)
+// Strict Semantic Risk System (Collapsed from 5-tier to 3-tier colors)
+val RiskCritical = Color(0xFFFF4757) // Red
+val RiskMedium = Color(0xFFFFB020)   // Amber
+val RiskSafe = Color(0xFF00D68A)     // Green
+
+// Backward compatibility mappings for existing 5-Tier Enum logic
+val RiskHigh = RiskCritical // Use Critical red
+val RiskLow = RiskMedium    // Use Medium amber
+
+// Text colors (High contrast)
+val TextPrimary = Color(0xFFFFFFFF)
+val TextSecondary = Color(0xFF8B949E)
+val TextMuted = Color(0xFF8B949E)
 
 // Status & Special
 val IndiaFlagSaffron = Color(0xFFFF9933)
 val IndiaFlagGreen = Color(0xFF138808)
-val C2BeaconAlert = Color(0xFFFF0055)
+val C2BeaconAlert = RiskCritical
+
+// GuardianOrb component ONLY
+val OrbCyan = Color(0xFF00F0FF)
+val OrbBlue = Color(0xFF1A56FF)

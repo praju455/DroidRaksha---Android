@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.droidraksha.mobile.domain.model.AgentVerdict
 import com.droidraksha.mobile.ui.theme.*
+import androidx.compose.ui.graphics.SolidColor
 
 @Composable
 fun AgentVerdictPanel(
@@ -54,13 +55,10 @@ fun AgentVerdictPanel(
                 enter = fadeIn() + expandVertically(expandFrom = Alignment.Bottom),
                 exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom)
             ) {
-                Card(
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A)),
+                Level1Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 520.dp)
-                        .border(1.dp, ShieldCyan.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
                 ) {
                     Column(
                         modifier = Modifier
@@ -74,33 +72,17 @@ fun AgentVerdictPanel(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .clip(CircleShape)
-                                        .background(Color(0xFF6366F1).copy(alpha = 0.2f))
-                                        .border(1.dp, Color(0xFF818CF8), CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.SmartToy,
-                                        contentDescription = null,
-                                        tint = Color(0xFFA5B4FC),
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
+                                BrandWordmark(modifier = Modifier.padding(end = 4.dp), showIcon = true)
                                 Column {
                                     Text(
-                                        text = "LangChain Forensic Verdict",
+                                        text = "Forensic Verdict",
                                         color = TextPrimary,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold
+                                        style = Typography.titleMedium
                                     )
                                     Text(
-                                        text = if (verdict != null) "${verdict.agentUsed} • ${verdict.inferenceMs}ms" else "Powered by Groq",
+                                        text = if (verdict != null) "${verdict.agentUsed} • ${verdict.inferenceMs}ms" else "Powered by DroidRaksha AI",
                                         color = TextMuted,
-                                        fontSize = 10.sp,
-                                        fontFamily = FontFamily.Monospace
+                                        style = Typography.bodySmall
                                     )
                                 }
                             }
@@ -123,7 +105,7 @@ fun AgentVerdictPanel(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                                    CircularProgressIndicator(color = ShieldCyan, modifier = Modifier.size(36.dp))
+                                    CircularProgressIndicator(color = AccentCyan, modifier = Modifier.size(36.dp))
                                     Text("ReAct Agent Reasoning with Groq LLM...", color = TextSecondary, fontSize = 12.sp)
                                     Text("Synthesizing court-admissible forensic verdict", color = TextMuted, fontSize = 10.sp)
                                 }
@@ -134,7 +116,7 @@ fun AgentVerdictPanel(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(10.dp))
-                                    .background(ShieldNavySurface)
+                                    .background(CardLevel2)
                                     .padding(horizontal = 12.dp, vertical = 8.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
@@ -142,10 +124,8 @@ fun AgentVerdictPanel(
                                 Text("Confidence Score:", color = TextSecondary, fontSize = 12.sp)
                                 Text(
                                     text = "${verdict.verdictConfidence}%",
-                                    color = if (verdict.verdictConfidence >= 80) RiskLow else RiskHigh,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp,
-                                    fontFamily = FontFamily.Monospace
+                                    color = if (verdict.verdictConfidence >= 80) RiskSafe else RiskCritical,
+                                    style = Typography.bodySmall.copy(fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                 )
                             }
 
@@ -155,7 +135,7 @@ fun AgentVerdictPanel(
                             ScrollableTabRow(
                                 selectedTabIndex = activeTab,
                                 containerColor = Color.Transparent,
-                                contentColor = ShieldCyan,
+                                contentColor = AccentCyan,
                                 edgePadding = 0.dp,
                                 divider = {}
                             ) {
@@ -213,7 +193,7 @@ fun AgentVerdictPanel(
                                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                                             verticalAlignment = Alignment.Top
                                         ) {
-                                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = ShieldCyan, modifier = Modifier.size(14.dp))
+                                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = AccentCyan, modifier = Modifier.size(14.dp))
                                             Text(rec, color = TextPrimary, fontSize = 12.sp, lineHeight = 16.sp)
                                         }
                                     }
@@ -236,12 +216,12 @@ fun AgentVerdictPanel(
                                 Text("No agent verdict synthesized yet.", color = TextMuted, fontSize = 12.sp)
                                 Button(
                                     onClick = onRunAgent,
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6366F1)),
+                                    colors = ButtonDefaults.buttonColors(containerColor = AccentCyan),
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
-                                    Icon(Icons.Default.Psychology, contentDescription = null, tint = TextPrimary)
+                                    Icon(Icons.Default.Psychology, contentDescription = null, tint = Color.Black)
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text("Synthesize Groq Verdict", color = TextPrimary, fontWeight = FontWeight.Bold)
+                                    Text("Synthesize Groq Verdict", color = Color.Black, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
@@ -258,9 +238,9 @@ fun AgentVerdictPanel(
                     isExpanded = !isExpanded
                 },
                 shape = RoundedCornerShape(24.dp),
-                color = Color(0xFF0F172A),
+                color = CardLevel1,
                 border = ButtonDefaults.outlinedButtonBorder.copy(
-                    brush = androidx.compose.ui.graphics.SolidColor(if (isExpanded) Color(0xFF818CF8) else ShieldCyan)
+                    brush = androidx.compose.ui.graphics.SolidColor(if (isExpanded) AccentCyan else DividerHairline)
                 ),
                 shadowElevation = 8.dp,
                 modifier = Modifier.height(48.dp)
@@ -273,7 +253,7 @@ fun AgentVerdictPanel(
                     Icon(
                         imageVector = Icons.Default.SmartToy,
                         contentDescription = "Threat Copilot Agent",
-                        tint = Color(0xFFA5B4FC),
+                        tint = AccentCyan,
                         modifier = Modifier.size(18.dp)
                     )
                     Text(
@@ -283,7 +263,7 @@ fun AgentVerdictPanel(
                         fontWeight = FontWeight.Bold
                     )
                     if (isLoading) {
-                        CircularProgressIndicator(color = ShieldCyan, modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
+                        CircularProgressIndicator(color = AccentCyan, modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
                     } else if (verdict != null) {
                         Box(
                             modifier = Modifier

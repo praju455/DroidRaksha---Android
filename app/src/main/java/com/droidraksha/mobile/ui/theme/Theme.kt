@@ -11,35 +11,35 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = ShieldCyan,
-    onPrimary = ShieldNavyDark,
-    primaryContainer = ShieldNavyCard,
-    onPrimaryContainer = ShieldCyan,
-    secondary = ShieldBlue,
+    primary = AccentCyan,
+    onPrimary = BackgroundDark,
+    primaryContainer = CardLevel2,
+    onPrimaryContainer = AccentCyan,
+    secondary = AccentCyan,
     onSecondary = TextPrimary,
-    background = ShieldNavyDark,
+    background = BackgroundDark,
     onBackground = TextPrimary,
-    surface = ShieldNavySurface,
+    surface = BackgroundSurface,
     onSurface = TextPrimary,
-    surfaceVariant = ShieldNavyCard,
+    surfaceVariant = CardLevel2,
     onSurfaceVariant = TextSecondary,
-    outline = ShieldNavyBorder,
+    outline = DividerHairline,
     error = RiskCritical,
     onError = TextPrimary,
 )
 
 @Composable
 fun DroidRakshaTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true, // Force Dark Mode as per request
     content: @Composable () -> Unit
 ) {
-    val colorScheme = DarkColorScheme // Default to cybersecurity dark aesthetic
+    val colorScheme = DarkColorScheme
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = ShieldNavyDark.toArgb()
-            window.navigationBarColor = ShieldNavyDark.toArgb()
+            window.statusBarColor = BackgroundDark.toArgb()
+            window.navigationBarColor = BackgroundDark.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
         }
     }

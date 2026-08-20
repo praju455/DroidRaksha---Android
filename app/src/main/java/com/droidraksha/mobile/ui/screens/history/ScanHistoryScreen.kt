@@ -18,6 +18,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import com.droidraksha.mobile.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -31,17 +33,22 @@ fun ScanHistoryScreen(
     val state by viewModel.uiState.collectAsState()
     val dateFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
 
+    val backgroundBrush = Brush.verticalGradient(
+        colors = listOf(BackgroundSurface, BackgroundDark)
+    )
+
     Scaffold(
-        containerColor = ShieldNavyDark,
+        containerColor = Color.Transparent,
+        modifier = Modifier.background(backgroundBrush),
         topBar = {
             TopAppBar(
-                title = { Text("Scan History & Audit Log", color = TextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
+                title = { Text("Scan History & Audit Log", color = TextPrimary, style = Typography.titleLarge, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = TextPrimary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = ShieldNavyDark)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { innerPadding ->
@@ -58,13 +65,9 @@ fun ScanHistoryScreen(
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 items(state.sessions, key = { it.id }) { session ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(ShieldNavyCard)
-                            .border(0.5.dp, ShieldNavyBorder, RoundedCornerShape(14.dp))
-                            .padding(16.dp)
+                    com.droidraksha.mobile.ui.components.GlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = 20.dp
                     ) {
                         Column {
                             Row(
@@ -75,14 +78,14 @@ fun ScanHistoryScreen(
                                 Text(
                                     text = dateFormat.format(Date(session.scanCompletedAt)),
                                     color = TextPrimary,
-                                    fontSize = 14.sp,
+                                    style = Typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
                                     text = "Device Score: ${session.deviceOverallScore}",
-                                    color = if (session.deviceOverallScore > 40) RiskHigh else RiskLow,
+                                    color = if (session.deviceOverallScore > 40) RiskHigh else RiskSafe,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp
+                                    style = Typography.labelSmall
                                 )
                             }
 
@@ -90,7 +93,7 @@ fun ScanHistoryScreen(
                             Text(
                                 text = "Triggered by: ${session.triggeredBy.replaceFirstChar { it.uppercase() }}",
                                 color = TextMuted,
-                                fontSize = 11.sp
+                                style = Typography.bodyMedium
                             )
 
                             Spacer(modifier = Modifier.height(10.dp))
@@ -102,7 +105,7 @@ fun ScanHistoryScreen(
                                 HistoryStat("Critical", session.criticalCount.toString(), RiskCritical)
                                 HistoryStat("High", session.highCount.toString(), RiskHigh)
                                 HistoryStat("Medium", session.mediumCount.toString(), RiskMedium)
-                                HistoryStat("Safe", session.safeCount.toString(), RiskLow)
+                                HistoryStat("Safe", session.safeCount.toString(), RiskSafe)
                             }
                         }
                     }
@@ -116,7 +119,7 @@ fun ScanHistoryScreen(
 @Composable
 private fun HistoryStat(label: String, value: String, color: androidx.compose.ui.graphics.Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(label, color = TextMuted, fontSize = 10.sp)
-        Text(value, color = color, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        Text(label, color = TextMuted, style = Typography.labelSmall)
+        Text(value, color = color, style = Typography.bodyMedium, fontWeight = FontWeight.Bold)
     }
 }

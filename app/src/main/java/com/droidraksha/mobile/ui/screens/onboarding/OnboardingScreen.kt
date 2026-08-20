@@ -1,9 +1,6 @@
 package com.droidraksha.mobile.ui.screens.onboarding
 
-import android.content.Intent
-import android.provider.Settings
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,143 +12,149 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.droidraksha.mobile.ui.components.GlassCard
+import com.droidraksha.mobile.ui.components.GuardianOrb
+import com.droidraksha.mobile.ui.components.BrandWordmark
 import com.droidraksha.mobile.ui.theme.*
 
 @Composable
 fun OnboardingScreen(
     onAcceptAndContinue: () -> Unit
 ) {
-    val context = LocalContext.current
     val scrollState = rememberScrollState()
+
+    // Premium radial gradient background for the whole screen
+    val backgroundBrush = Brush.radialGradient(
+        colors = listOf(BackgroundSurface, BackgroundDark),
+        radius = 1500f
+    )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(ShieldNavyDark)
-            .padding(24.dp)
+            .background(backgroundBrush)
             .verticalScroll(scrollState),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+        // Hero Section with Guardian Orb
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(350.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
+            GuardianOrb(size = 280.dp, isScanning = false)
+        }
 
-            // Shield Icon Header
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(ShieldNavyCard)
-                    .border(2.dp, ShieldCyan, RoundedCornerShape(20.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Shield,
-                    contentDescription = null,
-                    tint = ShieldCyan,
-                    modifier = Modifier.size(44.dp)
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        BrandWordmark()
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Your Android,\nGuarded.",
+            color = TextPrimary,
+            style = Typography.headlineLarge,
+            textAlign = TextAlign.Center
+        )
+
+        Text(
+            text = "On-Device Threat Intelligence against malware, network attacks, and privacy abuse.",
+            color = TextSecondary,
+            style = Typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Privacy & Consent Card
+        GlassCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+        ) {
+            Column {
+                Text(
+                    text = "🔒 Privacy & Transparency Guarantee",
+                    color = AccentCyan,
+                    style = Typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "DroidRaksha operates entirely on-device. Your photos, private messages, personal contacts, and browsing history are never uploaded or inspected.",
+                    color = TextSecondary,
+                    style = Typography.bodyMedium
                 )
             }
+        }
 
-            Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = "DroidRaksha Mobile",
-                color = TextPrimary,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = "On-Device Threat Intelligence for Indian Smartphones",
-                color = TextSecondary,
-                fontSize = 13.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Privacy & Consent Card
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(ShieldNavyCard)
-                    .border(1.dp, ShieldNavyBorder, RoundedCornerShape(16.dp))
-                    .padding(18.dp)
-            ) {
-                Column {
-                    Text(
-                        text = "🔒 Privacy & Transparency Guarantee",
-                        color = ShieldCyan,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "DroidRaksha operates on-device. Your photos, private messages, personal contacts, and browsing history are never uploaded or inspected.",
-                        color = TextSecondary,
-                        fontSize = 12.sp,
-                        lineHeight = 18.sp
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Required Permissions Breakdown
+        // Required Permissions Breakdown
+        Column(modifier = Modifier.padding(horizontal = 24.dp)) {
             PermissionItem(
                 icon = Icons.Default.Apps,
-                title = "App Inventory (QUERY_ALL_PACKAGES)",
-                description = "Scans installed app package names, APK signatures, and permissions to identify trojans and fake apps."
+                title = "App Inventory Analysis",
+                description = "Scans installed app signatures to identify trojans and fake apps."
             )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
+            Spacer(modifier = Modifier.height(16.dp))
             PermissionItem(
                 icon = Icons.Default.NetworkCheck,
-                title = "Network Visibility (Usage Stats)",
-                description = "Monitors background network bytes and connection regularity (CoV) to detect C2 bot beaconing."
+                title = "Network Visibility",
+                description = "Monitors background network patterns to detect C2 bot beaconing."
             )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
+            Spacer(modifier = Modifier.height(16.dp))
             PermissionItem(
                 icon = Icons.Default.Psychology,
-                title = "On-Device AI / ONNX ML",
-                description = "Executes local XGBoost and Isolation Forest models fully offline with zero battery drain."
+                title = "On-Device AI Engine",
+                description = "Executes local Machine Learning models offline with zero battery drain."
             )
         }
 
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(top = 28.dp)
+        Spacer(modifier = Modifier.height(40.dp))
+
+        // CTA Button
+        val buttonGradient = Brush.horizontalGradient(
+            colors = listOf(AccentCyan, AccentCyan, AccentCyan)
+        )
+        
+        Button(
+            onClick = onAcceptAndContinue,
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+            contentPadding = PaddingValues(),
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .height(60.dp)
+                .clip(RoundedCornerShape(16.dp))
         ) {
-            Button(
-                onClick = onAcceptAndContinue,
-                colors = ButtonDefaults.buttonColors(containerColor = ShieldCyan),
-                shape = RoundedCornerShape(12.dp),
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
+                    .fillMaxSize()
+                    .background(buttonGradient),
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "Grant Consent & Start Scan",
-                    color = ShieldNavyDark,
-                    fontSize = 15.sp,
+                    color = Color.White,
+                    style = Typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
             }
-            Spacer(modifier = Modifier.height(12.dp))
         }
+        
+        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
@@ -167,17 +170,31 @@ private fun PermissionItem(
     ) {
         Box(
             modifier = Modifier
-                .size(36.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(ShieldNavyCard),
+                .size(40.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(CardLevel2),
             contentAlignment = Alignment.Center
         ) {
-            Icon(imageVector = icon, contentDescription = null, tint = ShieldCyan, modifier = Modifier.size(20.dp))
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = AccentCyan,
+                modifier = Modifier.size(20.dp)
+            )
         }
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(16.dp))
         Column {
-            Text(text = title, color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-            Text(text = description, color = TextMuted, fontSize = 11.sp, lineHeight = 16.sp)
+            Text(
+                text = title, 
+                color = TextPrimary, 
+                style = Typography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = description, 
+                color = TextMuted, 
+                style = Typography.bodyMedium
+            )
         }
     }
 }

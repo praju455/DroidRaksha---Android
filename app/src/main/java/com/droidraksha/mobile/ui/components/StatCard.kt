@@ -30,7 +30,7 @@ fun StatCard(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
-            .background(ShieldNavyCard)
+            .background(CardLevel2)
             .border(1.dp, color.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
             .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
             .padding(12.dp)

@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,10 +9,10 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
-val properties = java.util.Properties()
+val properties = Properties()
 val localPropertiesFile = project.rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
-    properties.load(localPropertiesFile.inputStream())
+    properties.load(FileInputStream(localPropertiesFile))
 }
 
 android {
@@ -62,7 +65,7 @@ android {
     }
 
     // Allow ONNX model assets to not be compressed
-    aaptOptions {
+    androidResources {
         noCompress += listOf("onnx", "pkl")
     }
 

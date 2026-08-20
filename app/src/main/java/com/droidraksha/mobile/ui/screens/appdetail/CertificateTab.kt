@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.droidraksha.mobile.domain.model.AppInfo
 import com.droidraksha.mobile.ui.theme.*
+import com.droidraksha.mobile.ui.components.Level1Card
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun CertificateTab(app: AppInfo) {
@@ -37,13 +39,10 @@ fun CertificateTab(app: AppInfo) {
     ) {
         // Trust Header Card
         item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(ShieldNavyCard)
-                    .border(1.dp, trustColor.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
-                    .padding(18.dp)
+            Level1Card(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = 18.dp,
+                borderColor = trustColor.copy(alpha = 0.5f)
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(
@@ -100,21 +99,17 @@ fun CertificateTab(app: AppInfo) {
 
         // Detailed Certificate Properties
         item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(ShieldNavyCard)
-                    .border(0.5.dp, ShieldNavyBorder, RoundedCornerShape(16.dp))
-                    .padding(16.dp)
+            Level1Card(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = 20.dp
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(Icons.Default.Fingerprint, contentDescription = null, tint = ShieldCyan, modifier = Modifier.size(18.dp))
-                        Text("X.509 Certificate Metadata", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.Fingerprint, contentDescription = null, tint = AccentCyan, modifier = Modifier.size(18.dp))
+                        Text("X.509 CERTIFICATE METADATA", color = TextSecondary, style = Typography.titleMedium)
                     }
 
-                    Divider(color = ShieldNavyBorder, thickness = 0.5.dp)
+                    Divider(color = DividerHairline, thickness = 0.5.dp)
 
                     CertPropRow(label = "Subject DN", value = app.certSubject.ifBlank { "CN=${app.appName}, O=Developer" })
                     CertPropRow(label = "Issuer DN", value = app.certIssuer.ifBlank { "CN=${app.appName}, O=Developer" })
@@ -127,16 +122,12 @@ fun CertificateTab(app: AppInfo) {
 
         // Security Checklist
         item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(ShieldNavyCard)
-                    .border(0.5.dp, ShieldNavyBorder, RoundedCornerShape(16.dp))
-                    .padding(16.dp)
+            Level1Card(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = 20.dp
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("Security Validation Checklist", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text("SECURITY VALIDATION CHECKLIST", color = TextSecondary, style = Typography.titleMedium)
 
                     ChecklistRow(
                         title = "Production Signing Key",
@@ -169,10 +160,10 @@ private fun CertPropRow(label: String, value: String) {
         Text(
             text = value,
             color = TextPrimary,
-            fontSize = 12.sp,
-            fontFamily = FontFamily.Monospace,
-            lineHeight = 16.sp
+            style = Typography.bodySmall
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        Divider(color = DividerHairline, thickness = 0.5.dp)
     }
 }
 

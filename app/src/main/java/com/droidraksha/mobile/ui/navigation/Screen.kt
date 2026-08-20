@@ -12,4 +12,7 @@ sealed class Screen(val route: String) {
     }
     object ScanHistory : Screen("scan_history")
     object Settings : Screen("settings")
+    object LiveScan : Screen("live_scan")
+    object NetworkSecurity : Screen("network_security")
+    object Profile : Screen("profile")
 }

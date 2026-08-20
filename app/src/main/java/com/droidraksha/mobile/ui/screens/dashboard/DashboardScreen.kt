@@ -16,13 +16,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.droidraksha.mobile.domain.model.AppInfo
 import com.droidraksha.mobile.domain.model.RiskLevel
+import com.droidraksha.mobile.ui.components.Level1Card
 import com.droidraksha.mobile.ui.components.AppRowItem
-import com.droidraksha.mobile.ui.components.StatCard
+import com.droidraksha.mobile.ui.components.DeviceSecurityGauge
 import com.droidraksha.mobile.ui.theme.*
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun DashboardScreen(
@@ -31,198 +37,281 @@ fun DashboardScreen(
     onNavigateToAppDetail: (String) -> Unit,
     onNavigateToHistory: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToLiveScan: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
 
     Scaffold(
-        containerColor = ShieldNavyDark,
-        topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        containerColor = BackgroundSurface, // Pure black background
+        floatingActionButton = {
+            // Neon Cyan solid FAB for Live Scan
+            FloatingActionButton(
+                onClick = {
+                    viewModel.startScan()
+                    onNavigateToLiveScan()
+                },
+                shape = CircleShape,
+                containerColor = AccentCyan,
+                contentColor = Color.Black,
+                modifier = Modifier.size(64.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Security,
-                        contentDescription = null,
-                        tint = ShieldCyan,
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = "DroidRaksha",
-                        color = TextPrimary,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    IconButton(onClick = onNavigateToHistory) {
-                        Icon(Icons.Default.History, contentDescription = "History", tint = TextSecondary)
-                    }
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings", tint = TextSecondary)
-                    }
-                }
+                Icon(
+                    imageVector = Icons.Default.Radar,
+                    contentDescription = "Live Scan",
+                    modifier = Modifier.size(32.dp)
+                )
             }
-        }
+        },
+        floatingActionButtonPosition = FabPosition.End
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Scanning progress card (if active)
-            if (state.isScanning) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(ShieldNavyCard)
-                            .border(1.dp, ShieldCyan, RoundedCornerShape(16.dp))
-                            .padding(16.dp)
-                    ) {
-                        Column {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text("Scanning Installed Apps...", color = ShieldCyan, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                Text("${state.scanProgress} / ${state.scanTotal}", color = TextSecondary, fontSize = 12.sp)
-                            }
-                            Spacer(modifier = Modifier.height(10.dp))
-                            val progress = if (state.scanTotal > 0) state.scanProgress.toFloat() / state.scanTotal else 0f
-                            LinearProgressIndicator(
-                                progress = { progress },
-                                modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
-                                color = ShieldCyan,
-                                trackColor = ShieldNavySurface,
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
+            // Top Window Bar (macOS style + Breadcrumb)
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        // Breadcrumb
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Icon(Icons.Default.VerifiedUser, contentDescription = null, tint = AccentCyan, modifier = Modifier.size(14.dp))
                             Text(
-                                text = state.currentScanningApp,
-                                color = TextMuted,
-                                fontSize = 11.sp,
-                                maxLines = 1
+                                text = "DROID.RAKSHA / LOCAL_DEVICE",
+                                color = TextPrimary,
+                                style = Typography.bodySmall
                             )
                         }
+                    }
+
+                    // Live Feed Badge
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .border(1.dp, Color(0x22FFFFFF), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(AccentCyan))
+                        Text("LIVE FEED", color = TextSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                    }
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            // Security Score Gauge
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    DeviceSecurityGauge(
+                        totalApps = state.totalApps,
+                        criticalCount = state.criticalCount,
+                        highCount = state.highCount,
+                        mediumCount = state.mediumCount,
+                        safeCount = state.safeCount,
+                        deviceRiskScore = state.deviceRiskScore,
+                        isScanning = state.isScanning,
+                        onStartScan = {
+                            viewModel.startScan()
+                            onNavigateToLiveScan()
+                        }
+                    )
+                }
+            }
+
+            // Horizontal Metric Box
+            item {
+                Level1Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = 16.dp
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        MiniMetric(title = "TOTAL THREATS", value = "${state.criticalCount + state.highCount}", color = AccentCyan)
+                        Box(modifier = Modifier.width(1.dp).height(40.dp).background(Color(0x1AFFFFFF)))
+                        MiniMetric(title = "SAFETY SCORE", value = "${(100 - state.deviceRiskScore).coerceIn(0, 100)}", color = TextPrimary)
+                        Box(modifier = Modifier.width(1.dp).height(40.dp).background(Color(0x1AFFFFFF)))
+                        MiniMetric(title = "SCANNED APPS", value = "${state.totalApps}", color = RiskSafe)
                     }
                 }
             }
 
-            // Visually Appealing Device Security Tachometer & Scoreboard
+            // Threat Intelligence Feed
             item {
-                com.droidraksha.mobile.ui.components.DeviceSecurityGauge(
-                    totalApps = state.totalApps,
-                    criticalCount = state.criticalCount,
-                    highCount = state.highCount,
-                    mediumCount = state.mediumCount,
-                    safeCount = state.safeCount,
-                    deviceRiskScore = state.deviceRiskScore,
-                    isScanning = state.isScanning,
-                    onStartScan = { viewModel.startScan() }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Threat Feed",
+                        color = TextPrimary,
+                        style = Typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    TextButton(onClick = { onNavigateToAppList(null) }) {
+                        Text("View All", color = AccentCyan, style = Typography.labelSmall)
+                    }
+                }
+            }
+
+            if (state.topThreats.isNotEmpty()) {
+                items(state.topThreats) { app ->
+                    Level1Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = 16.dp
+                    ) {
+                        AppRowItem(app = app, onClick = { onNavigateToAppDetail(app.packageName) })
+                    }
+                }
+            } else {
+                item {
+                    Level1Card(modifier = Modifier.fillMaxWidth(), contentPadding = 16.dp) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(Icons.Default.VerifiedUser, contentDescription = null, tint = RiskSafe)
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text("No active threats detected.", color = TextSecondary, style = Typography.bodyMedium)
+                        }
+                    }
+                }
+            }
+            
+            item { Spacer(modifier = Modifier.height(100.dp)) }
+        }
+    }
+}
+
+@Composable
+fun MetricCard(
+    title: String,
+    value: String,
+    subtitle: String? = null,
+    trendText: String? = null,
+    trendColor: Color = RiskSafe,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    progress: Float? = null,
+    progressColor: Color = AccentCyan
+) {
+    Level1Card(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = 20.dp
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Text(
+                    text = title,
+                    color = TextSecondary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = TextSecondary,
+                    modifier = Modifier.size(18.dp)
                 )
             }
-
-            // 5-Tier Summary Stats Grid
-            item {
-                Text("App Risk Breakdown", color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    StatCard("Critical", state.criticalCount, RiskCritical, Icons.Default.Warning, onClick = { onNavigateToAppList("CRITICAL") }, modifier = Modifier.weight(1f))
-                    StatCard("High", state.highCount, RiskHigh, Icons.Default.ErrorOutline, onClick = { onNavigateToAppList("HIGH") }, modifier = Modifier.weight(1f))
-                    StatCard("Medium", state.mediumCount, RiskMedium, Icons.Default.Info, onClick = { onNavigateToAppList("MEDIUM") }, modifier = Modifier.weight(1f))
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    StatCard("Low Risk", state.lowCount, RiskLow, null, onClick = { onNavigateToAppList("LOW") }, modifier = Modifier.weight(1f))
-                    StatCard("Safe Apps", state.safeCount, RiskSafe, Icons.Default.CheckCircle, onClick = { onNavigateToAppList("SAFE") }, modifier = Modifier.weight(1f))
-                    StatCard("Total Scanned", state.totalApps, TextPrimary, Icons.Default.Apps, onClick = { onNavigateToAppList(null) }, modifier = Modifier.weight(1f))
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(
+                    text = value,
+                    color = TextPrimary,
+                    style = Typography.displayLarge,
+                    fontSize = 40.sp,
+                    lineHeight = 40.sp
+                )
+                if (subtitle != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = subtitle,
+                        color = TextSecondary,
+                        style = Typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
                 }
             }
-
-            // LangChain AI Copilot Banner
-            item {
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            if (trendText != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = if (trendColor == RiskSafe) Icons.Default.TrendingUp else Icons.Default.TrendingDown,
+                        contentDescription = null,
+                        tint = trendColor,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(trendText, color = trendColor, fontSize = 12.sp)
+                }
+            }
+            
+            if (progress != null) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(ShieldNavyCard)
-                        .border(1.dp, androidx.compose.ui.graphics.Color(0xFF6366F1).copy(alpha = 0.4f), RoundedCornerShape(16.dp))
-                        .padding(16.dp)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(Color(0x1AFFFFFF))
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(CircleShape)
-                                    .background(androidx.compose.ui.graphics.Color(0xFF6366F1).copy(alpha = 0.2f))
-                                    .border(1.dp, androidx.compose.ui.graphics.Color(0xFF818CF8), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.SmartToy,
-                                    contentDescription = null,
-                                    tint = androidx.compose.ui.graphics.Color(0xFFA5B4FC),
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-                            Column {
-                                Text(
-                                    text = "LangChain ReAct Agent",
-                                    color = TextPrimary,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "Groq Llama-3.3-70B Active • Court-grade forensic verdict",
-                                    color = TextMuted,
-                                    fontSize = 11.sp
-                                )
-                            }
-                        }
-                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(progress.coerceIn(0f, 1f))
+                            .height(4.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(progressColor)
+                    )
                 }
             }
-
-            // Top Flagged Threats Section
-            if (state.topThreats.isNotEmpty()) {
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Top Action Required", color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-                        TextButton(onClick = { onNavigateToAppList(null) }) {
-                            Text("View All (${state.totalApps})", color = ShieldCyan, fontSize = 12.sp)
-                        }
-                    }
-                }
-
-                items(state.topThreats) { app ->
-                    AppRowItem(app = app, onClick = { onNavigateToAppDetail(app.packageName) })
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(24.dp)) }
         }
+    }
+}
+
+@Composable
+fun EventLogItem(tag: String, message: String, tagColor: Color) {
+    val time = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(time, color = Color(0xFF3F3F46), style = Typography.bodySmall) // Very muted dark grey
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(tag, color = tagColor, style = Typography.bodySmall)
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(message, color = TextSecondary, style = Typography.bodySmall)
+    }
+}
+
+@Composable
+fun MiniMetric(title: String, value: String, color: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(value, color = color, style = Typography.displaySmall, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(title, color = TextSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
     }
 }

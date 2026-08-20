@@ -1,6 +1,9 @@
 package com.droidraksha.mobile.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -20,6 +23,9 @@ import com.droidraksha.mobile.ui.screens.history.ScanHistoryViewModel
 import com.droidraksha.mobile.ui.screens.onboarding.OnboardingScreen
 import com.droidraksha.mobile.ui.screens.settings.SettingsScreen
 import com.droidraksha.mobile.ui.screens.settings.SettingsViewModel
+import com.droidraksha.mobile.ui.screens.scan.LiveScanScreen
+import com.droidraksha.mobile.ui.screens.network.NetworkSecurityScreen
+import com.droidraksha.mobile.ui.screens.profile.ProfileScreen
 
 @Composable
 fun AppNavigation(
@@ -57,6 +63,9 @@ fun AppNavigation(
                 },
                 onNavigateToSettings = {
                     navController.navigate(Screen.Settings.route)
+                },
+                onNavigateToLiveScan = {
+                    navController.navigate(Screen.LiveScan.route)
                 }
             )
         }
@@ -123,6 +132,44 @@ fun AppNavigation(
             SettingsScreen(
                 viewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.LiveScan.route) { backStackEntry ->
+            // Use the DashboardViewModel scoped to the Dashboard route to read real scan progress
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(Screen.Dashboard.route)
+            }
+            val viewModel: DashboardViewModel = hiltViewModel(parentEntry)
+            val state by viewModel.uiState.collectAsState()
+
+            LiveScanScreen(
+                scanProgress = state.scanProgress,
+                totalToScan = state.scanTotal,
+                currentScanningApp = state.currentScanningApp,
+                isScanning = state.isScanning,
+                onCancel = { navController.popBackStack() },
+                onScanComplete = { 
+                    navController.popBackStack()
+                    navController.navigate(Screen.ScanHistory.route)
+                }
+            )
+        }
+
+        composable(Screen.NetworkSecurity.route) {
+            NetworkSecurityScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.Profile.route) {
+            ProfileScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onLogout = {
+                    navController.navigate(Screen.Onboarding.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
     }

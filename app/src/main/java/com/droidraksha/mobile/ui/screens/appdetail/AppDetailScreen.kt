@@ -27,7 +27,11 @@ import com.droidraksha.mobile.domain.model.C2Verdict
 import com.droidraksha.mobile.ui.components.AgentVerdictPanel
 import com.droidraksha.mobile.ui.components.InteractiveScoreboard
 import com.droidraksha.mobile.ui.components.ThreatChip
+import com.droidraksha.mobile.ui.components.Level1Card
 import com.droidraksha.mobile.ui.theme.*
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,38 +55,43 @@ fun AppDetailScreen(
         }.getOrNull()
     }
 
+    val backgroundBrush = Brush.verticalGradient(
+        colors = listOf(BackgroundSurface, BackgroundDark)
+    )
+
     Scaffold(
-        containerColor = ShieldNavyDark,
+        containerColor = Color.Transparent,
+        modifier = Modifier.background(backgroundBrush),
         topBar = {
             TopAppBar(
                 title = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         if (appIconDrawable != null) {
                             coil.compose.AsyncImage(
                                 model = appIconDrawable,
                                 contentDescription = state.app?.appName,
                                 modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .size(40.dp)
+                                    .clip(RoundedCornerShape(12.dp))
                             )
                         } else {
-                            Icon(Icons.Default.Android, contentDescription = null, tint = ShieldCyan, modifier = Modifier.size(28.dp))
+                            Icon(Icons.Default.Android, contentDescription = null, tint = AccentCyan, modifier = Modifier.size(28.dp))
                         }
                         Column {
                             Text(
                                 text = state.app?.appName ?: "Forensic Analysis",
                                 color = TextPrimary,
-                                fontSize = 16.sp,
+                                style = Typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                             if (state.app != null) {
                                 Text(
                                     text = state.app!!.packageName,
-                                    color = TextMuted,
-                                    fontSize = 11.sp
+                                    color = TextSecondary,
+                                    style = Typography.labelSmall
                                 )
                             }
                         }
@@ -93,7 +102,7 @@ fun AppDetailScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = TextPrimary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = ShieldNavyDark)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { innerPadding ->
@@ -105,7 +114,7 @@ fun AppDetailScreen(
                     .padding(innerPadding),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = ShieldCyan)
+                CircularProgressIndicator(color = AccentCyan)
             }
         } else {
             Box(
@@ -117,17 +126,17 @@ fun AppDetailScreen(
                     // Navigation Tabs
                     TabRow(
                         selectedTabIndex = selectedTabIndex,
-                        containerColor = ShieldNavyDark,
-                        contentColor = ShieldCyan,
+                        containerColor = Color.Transparent,
+                        contentColor = AccentCyan,
                         indicator = { tabPositions ->
                             TabRowDefaults.Indicator(
                                 Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                                color = ShieldCyan,
+                                color = AccentCyan,
                                 height = 3.dp
                             )
                         },
                         divider = {
-                            Divider(color = ShieldNavyBorder, thickness = 0.5.dp)
+                            Divider(color = DividerHairline, thickness = 1.dp)
                         }
                     ) {
                         Tab(
@@ -206,13 +215,9 @@ private fun OverviewTabContent(
 
         // LangChain Agent Forensic Verdict Inline Card
         item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(ShieldNavyCard)
-                    .border(1.dp, androidx.compose.ui.graphics.Color(0xFF6366F1).copy(alpha = 0.5f), RoundedCornerShape(16.dp))
-                    .padding(16.dp)
+            Level1Card(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = 20.dp
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(
@@ -245,14 +250,14 @@ private fun OverviewTabContent(
                         }
                     }
 
-                    if (isAgentLoading) {
+                        if (isAgentLoading) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                             modifier = Modifier.padding(vertical = 12.dp)
                         ) {
-                            CircularProgressIndicator(color = ShieldCyan, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                            Text("Agent reasoning with Groq Llama-3.3-70B...", color = TextSecondary, fontSize = 12.sp)
+                            CircularProgressIndicator(color = AccentCyan, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                            Text("Agent reasoning with Groq Llama-3.3-70B...", color = TextSecondary, style = Typography.bodyMedium)
                         }
                     } else if (agentVerdict != null) {
                         Text(
@@ -269,7 +274,7 @@ private fun OverviewTabContent(
                                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                                     verticalAlignment = Alignment.Top
                                 ) {
-                                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = ShieldCyan, modifier = Modifier.size(13.dp))
+                                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = AccentCyan, modifier = Modifier.size(13.dp))
                                     Text(rec, color = TextMuted, fontSize = 11.sp)
                                 }
                             }
@@ -282,13 +287,13 @@ private fun OverviewTabContent(
                         )
                         Button(
                             onClick = onRunAgent,
-                            colors = ButtonDefaults.buttonColors(containerColor = androidx.compose.ui.graphics.Color(0xFF6366F1)),
-                            shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.fillMaxWidth().height(40.dp)
+                            colors = ButtonDefaults.buttonColors(containerColor = AccentCyan),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth().height(48.dp)
                         ) {
-                            Icon(Icons.Default.Psychology, contentDescription = null, tint = TextPrimary, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Run Groq Agent Verdict", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Icon(Icons.Default.Psychology, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Run Groq Agent Verdict", color = Color.White, fontWeight = FontWeight.Bold, style = Typography.labelSmall)
                         }
                     }
                 }
@@ -297,13 +302,9 @@ private fun OverviewTabContent(
 
         // Quick Metadata Card
         item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(ShieldNavyCard)
-                    .border(0.5.dp, ShieldNavyBorder, RoundedCornerShape(14.dp))
-                    .padding(14.dp)
+            Level1Card(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = 20.dp
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -402,13 +403,13 @@ private fun OverviewTabContent(
                 if (app.riskScore >= 40) {
                     Button(
                         onClick = { onNavigateToDeepScan(app.packageName) },
-                        colors = ButtonDefaults.buttonColors(containerColor = ShieldCyan),
+                        colors = ButtonDefaults.buttonColors(containerColor = AccentCyan),
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth().height(48.dp)
+                        modifier = Modifier.fillMaxWidth().height(56.dp)
                     ) {
-                        Icon(Icons.Default.Psychology, contentDescription = null, tint = ShieldNavyDark)
+                        Icon(Icons.Default.Psychology, contentDescription = null, tint = BackgroundDark)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Run Gemini AI Deep Scan", color = ShieldNavyDark, fontWeight = FontWeight.Bold)
+                        Text("Run Gemini AI Deep Scan", color = BackgroundDark, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -444,13 +445,9 @@ private fun DetailSectionCard(
     title: String,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(ShieldNavyCard)
-            .border(0.5.dp, ShieldNavyBorder, RoundedCornerShape(14.dp))
-            .padding(16.dp)
+    Level1Card(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = 20.dp
     ) {
         Column {
             Text(title, color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
