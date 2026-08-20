@@ -6,6 +6,12 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+val properties = java.util.Properties()
+val localPropertiesFile = project.rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    properties.load(localPropertiesFile.inputStream())
+}
+
 android {
     namespace = "com.droidraksha.mobile"
     compileSdk = 35
@@ -21,6 +27,9 @@ android {
 
         // Backend base URL (override in local.properties or build flavors)
         buildConfigField("String", "BACKEND_BASE_URL", "\"http://10.0.2.2:8000\"")
+        
+        val groqApiKey = properties.getProperty("GROQ_API_KEY") ?: ""
+        buildConfigField("String", "GROQ_API_KEY", "\"$groqApiKey\"")
     }
 
     buildTypes {

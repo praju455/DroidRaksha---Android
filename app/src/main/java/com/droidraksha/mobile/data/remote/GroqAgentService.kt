@@ -1,5 +1,6 @@
 package com.droidraksha.mobile.data.remote
 
+import com.droidraksha.mobile.BuildConfig
 import com.droidraksha.mobile.domain.model.AgentVerdict
 import com.droidraksha.mobile.domain.model.AppInfo
 import com.squareup.moshi.Moshi
@@ -20,7 +21,7 @@ class GroqAgentService @Inject constructor(
 ) {
     companion object {
         private const val GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-        private const val GROQ_API_KEY = "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"
+        private val GROQ_API_KEY = BuildConfig.GROQ_API_KEY
         private const val MODEL = "llama-3.3-70b-versatile"
     }
 
