@@ -8,6 +8,57 @@
 
 DroidRaksha is explicitly designed as a distributed, two-tier architecture to balance immediate on-device protection with heavy, forensic-grade analysis:
 
+
+```mermaid
+graph TD
+    %% Styling
+    classDef mobile fill:#0D47A1,stroke:#1976D2,stroke-width:2px,color:#fff
+    classDef web fill:#1B5E20,stroke:#388E3C,stroke-width:2px,color:#fff
+    classDef analysis fill:#E65100,stroke:#F57C00,stroke-width:2px,color:#fff
+    classDef db fill:#4A148C,stroke:#7B1FA2,stroke-width:2px,color:#fff
+
+    subgraph Layer1["LAYER 1 - CLIENT (ON-DEVICE, TIER 1)"]
+        direction TB
+        MobileApp["📱 Mobile App (Kotlin / Jetpack Compose)<br/>Runs 24x7 Offline"]:::mobile
+        LocalAnalysis["⚡ ON-DEVICE ANALYSIS<br/>• Permission Analyzer<br/>• YARA-Lite (NDK)<br/>• ONNX Mobile (ML)<br/>• Offline IOCs"]:::mobile
+        Score{"Local Threat<br/>Score (0-100)"}:::mobile
+        LowRisk["✅ Low Risk (Keep Locally)"]
+        HighRisk["⛔ High Risk (Upload APK)"]
+
+        MobileApp --> LocalAnalysis --> Score
+        Score -- "< 40" --> LowRisk
+        Score -- ">= 40" --> HighRisk
+    end
+
+    subgraph Layer2["LAYER 2 - WEBSITE DEEP SCAN (TIER 2)"]
+        direction LR
+        Backend["⚡ FastAPI Backend<br/>(Python)"]:::web
+        WebDash["💻 Website Dashboard<br/>(Next.js)"]:::web
+        
+        subgraph Pipeline["18-Stage Analysis Pipeline"]
+            direction TB
+            T1["Tier 1: Prelim<br/>File Validation<br/>VirusTotal"]:::analysis
+            T2["Tier 2: Static & ML<br/>JADX / MobSF<br/>MalBERT / LangChain"]:::analysis
+            T3["Tier 3: Dynamic<br/>Frida Sandbox<br/>mitmproxy Capture<br/>C2 Correlation"]:::analysis
+            
+            T1 --> T2 --> T3
+        end
+        
+        HighRisk -. "WSS / HTTPS" .-> Backend
+        Backend --> Pipeline
+        Backend --> WebDash
+    end
+
+    subgraph Layer3["LAYER 3 - DATA STORAGE"]
+        direction LR
+        PG[(PostgreSQL<br/>Metadata)]:::db
+        Mongo[(MongoDB<br/>Raw JSON)]:::db
+        ES[(Elasticsearch<br/>IOC Index)]:::db
+        Pipeline --> PG & Mongo & ES
+    end
+```
+
+1. **Tier 1 (This Repository - Android App):** A lightweight, always-on client running 24x7 locally. It uses static analysis, local ML models (ONNX), and YARA-Lite to compute an instant local threat score (0-100) for every app on the device—completely offline.
 1. **Tier 1 (This Repository - Android App):** A lightweight, always-on client running 24x7 locally. It uses static analysis, local ML models (ONNX), and YARA-Lite to compute an instant local threat score (0-100) for every app on the device—completely offline.
 2. **Tier 2 (Website Backend - DroidRaksha Web):** A massive 18-stage deep-scan pipeline for high-risk applications. If Tier 1 flags an app as HIGH/CRITICAL risk, the APK is uploaded to the Tier 2 platform which executes full static analysis (Androguard, MobSF, MalBERT), dynamic network analysis (Frida, mitmproxy sandbox), and generates a court-grade AI narrative using LangChain + Groq/Gemini.
 
